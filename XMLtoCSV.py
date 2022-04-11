@@ -14,6 +14,9 @@ def toCSV(path):
     for file in files:
         if file.endswith(".xml") or file.endswith(".pdf"):
             valFiles.add(file.split(".")[0])
+    def finder2(word,lista,spaces):
+        i = lista.index(word)
+        return lista[i+spaces]
     def finder(word,string,escape="\""):
         it = [m.start() for m in re.finditer(word, string)]
         out = []
@@ -33,7 +36,7 @@ def toCSV(path):
             out.append(temp)
             indice +=1
         out = np.array(out).T
-        return out         
+        return out
     # Se ha creado la lista de archivos validada
     it = 0
     arr = []
@@ -76,7 +79,11 @@ def toCSV(path):
             subtot = finder("SubTotal=",s)
             desc = 0
             abo = 0
-            totCargos = finder(" Total=",s)
+            putas = ["0"]*(len(concepto)-1)
+            putas.append(subtot[-1])
+            subtot = putas
+            totCargos = putas
+
             
             # Corrección de palabra añejo
             print(concepto)
@@ -105,29 +112,24 @@ def toCSV(path):
             # Iterando conceptos dentro de una factura
             for i in range(len(concepto)):        
                 arr.append([fecha[0],serie[0],tc[0],occbi[0],ref[0],folio[0],tequila,tipo,concepto[i],
-                                      cases[i],bot,lit,subtot[0],desc,abo,totCargos[0]])
+                                      cases[i],bot,lit,subtot[i],desc,abo,totCargos[i]])
         else: #sólo se procesa PDF
+
             print("Procesando sólo PDF")
             s = extract_text(file+".pdf")
-            # Aplicando método enano. Spliteo de todo el texto y encontrando usando funciones de lista
-            s = s.split("\n\n")
-            s = [x for x in s if "\n" not in x]
-            s = [x for x in s if "$ " not in x]
-            fecha = [next(x for x in s if "creada" in x)]
-            fecha = finder("creada",fecha[0],fecha[0][-1])
-            serie = ["P"]
-            tc = [s[s.index("TC ")+1]]
-            occbi = [0]
-            #if search("CBI",):
-            #    occbi = [next(x for x in s if "CBI" in x)]
+            fecha = re.findall(r'creada.([0-2][0-9]|3[0-1])/([0-2][0-9]|3[0-1])/(\d{4})',s,flags=re.I|re.M|re.X)
+            fecha = "/".join(list(fecha[0]))
+            s = re.split("\n",s)
+            s.remove('')
+            serie = "P"
+            tc = finder2("TC ",s,4)
+            occbi = [x for x in s if "CBI" in x]
+            if occbi:
+                occbi = "OC"+occbi[0]
+            else:
+                occbi = 0
             ref = occbi
-            if occbi != [0]:
-                occbi = finder("CB",occbi[0],occbi[0][-1])
-            subtot = [s[s.index("SUB-TOTAL")+1]]
-            tot = [s[s.index("TOTAL")+1]]
-            folio =[0]
-            cases = [0]
-
+            folio = 0
             tequila = 0
             tipo = 0
             concepto = [s[s.index("Cantidad")+1] +" "+ s[s.index("Descripcion")+1]]
@@ -135,12 +137,14 @@ def toCSV(path):
             lit = 0
             desc = 0
             abo = 0
+            cases = 0
+            tot = [x for x in s if "." in x]
+            tot = tot[-1]
+            subtot = tot
 
-            for i in range(len(concepto)):
-                arr.append([fecha[0], serie[0], tc[0], occbi[0], ref[0], folio[0], tequila, tipo, concepto[i],
-                        cases[i], bot, lit, subtot[0], desc, abo, tot[0]])
+            arr.append([fecha, serie, tc, occbi, ref, folio, tequila, tipo, concepto[0],
+                    cases, bot, lit, subtot, desc, abo, tot])
 
-        it+=1
     arr = np.array(arr)
     target = pd.DataFrame(data = arr,columns = ["Fecha","Serie","TC"," OC. CBI ","Referencia","Folio",
                                      "Tequila","Tipo","Concepto","Cases","Botellas","Litros",
