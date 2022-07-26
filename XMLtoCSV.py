@@ -129,7 +129,11 @@ def toCSV(path):
             else:
                 occbi = 0
             ref = occbi
-            folio = 0
+            def folio(lista):
+                filter_object = filter(lambda a: "INVOICE" in a, lista)
+                invoice = re.findall(r'\d+',list(filter_object)[0])
+                return int(invoice[0])
+            folio = folio(s)
             tequila = 0
             tipo = 0
             concepto = [s[s.index("Cantidad")+1] +" "+ s[s.index("Descripcion")+1]]
@@ -163,8 +167,8 @@ def askDir():
     path = filedialog.askdirectory()
     return path
     
-
-#toCSV(askDir())
+# debugger 
+#toCSV(r"D:\\VENVXMLCSV\\SeriePprueba\\")
 
 
 
