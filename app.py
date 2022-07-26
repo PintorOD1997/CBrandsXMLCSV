@@ -13,7 +13,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def home():
     uploadedFiles = os.listdir(app.config['UPLOAD_FOLDER'])
     for f in uploadedFiles:
-        os.remove(f)
+        rem = os.path.join(UPLOAD_FOLDER, f)
+        os.remove(rem)            
     return render_template("home.html")
 @app.route("/convertir",methods=["POST"])
 def upload():
