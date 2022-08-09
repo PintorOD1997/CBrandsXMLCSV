@@ -34,7 +34,6 @@ packaging==21.3
 pandas==1.4.1
 parso==0.8.3
 pdfminer.six==20220319
-pdftopng==0.2.3
 pickleshare==0.7.5
 prompt-toolkit==3.0.29
 psutil==5.9.1
