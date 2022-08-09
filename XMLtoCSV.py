@@ -9,11 +9,6 @@ import re
  #Table extraction
  
 from tabula import read_pdf
-from tabulate import tabulate
-import pandas as pd
-import io
-
-
 
 def toCSV(path):
     os.chdir(path)
