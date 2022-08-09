@@ -6,6 +6,14 @@ from pdfminer.high_level import extract_text
 from re import search
 import re
 
+ #Table extraction
+ 
+from tabula import read_pdf
+from tabulate import tabulate
+import pandas as pd
+import io
+
+
 
 def toCSV(path):
     os.chdir(path)
@@ -306,7 +314,117 @@ def reduced_bill(path):
     target.to_csv("resultado.csv",index=False,encoding="iso-8859-1")
     print(path)
 
+def purchase_order(path):
+    os.chdir(path)
+    files = os.listdir(path)
+    valFiles = set()#Archivos validados con extensión válida
+    for file in files:
+        if file.endswith(".xml") or file.endswith(".pdf"):
+            valFiles.add(file.split(".")[0])
+    def finder2(word,lista,spaces):
+        i = lista.index(word)
+        return lista[i+spaces]
+    def finder(word,string,escape="\""):
+        it = [m.start() for m in re.finditer(word, string)]
+        out = []
+        for i in it:
+            indice = 0
+            temp = []
+            start = i
+            # Búsqueda exhaustiva de la existencia de palabras
+            if start == -1:
+                print("Error Fatal")
+                return None
+            start += len(word)+1
+            while string[start] != escape:
+                temp.append(string[start])
+                start+=1
+            temp = "".join(temp)
+            out.append(temp)
+            indice +=1
+        out = np.array(out).T
+        return out
+    def table_dancer(pdf_file):
+        def extract_useful_rows_indexes(table):
+            rows_index = [index for index, value in enumerate(table.values) if str(value) != 'nan'] 
+            return rows_index
+        raw_table = read_pdf(pdf_file, pages='all')[0][2:]
+        rows_index = extract_useful_rows_indexes(raw_table.iloc[0])
 
+        
+        table = []
+        for index, row in raw_table.iterrows():
+            row_values = [value for index, value in enumerate(row.values) if index in rows_index]
+            if "Terms:" in row_values:
+                break
+            else: 
+                table.append(row_values)
+        clean_table = pd.DataFrame(table)
+        return clean_table
+    
+        
+        
+    # Se ha creado la lista de archivos validada
+    it = 0
+    arr = []
+    for file in valFiles:
+        print("Procesando sólo PDF" + file)
+        s = extract_text(file+".pdf")
+        df = table_dancer(file+".pdf")
+        # Table processing for data extraction
+        # Header setting
+        df.columns = df.iloc[0]
+        df.drop(df.index[0],inplace=True)
+        # Dropping innecesary columns, checking for correct table extraction
+        col_list = ["Item Description Quantity","Total with Tax"]
+        flag = 0
+        try:
+            df = df[col_list]
+            total = df["Total with Tax"]
+            total = total.str.replace(r'$', '')
+            total = total.str.replace(r',', '')
+            total = pd.to_numeric(total)
+            total = list(total)
+        except:
+            exception = list(df.iloc[:,0])
+            exception = pd.DataFrame(exception)
+            exception.dropna(inplace=True)
+            total = exception.iloc[:,0]
+            total = total.str.replace(r',', '')
+            total = total.str.replace(r'$', '')
+            total = list(total)
+            temp = []
+            for it in total:
+                try:
+                    temp.append(float(it))
+                except:
+                    pass
+            if len(temp) > 1:
+                return print("Error Fatal")
+                break
+            else:
+                total = [temp]  
+                flag = 1          
+        # Converting total to numeric variable
+        
+        # Almacenating sepparately the items list
+        if flag == 1:
+            items = [file]
+        else: 
+            items = list(df["Item Description Quantity"])
+        fecha = re.findall(r'([0-2][0-9]|3[0-1])/([0-2][0-9]|3[0-1])/(\d{4})',s,flags=re.I|re.M|re.X)
+        fecha = ["/".join(list(fecha[0]))]*len(items)
+        s = re.split(" ",s)
+        s.remove('')
+        s = ' '.join(s)
+        s = re.split("\n",s)
+        cbi = [x for x in s if "CBI" in x]*len(items)
+        for i in range(len(items)):        
+            arr.append([fecha[i],cbi[i],items[i],total[i]])
+    target = pd.DataFrame(data = arr,columns = ["Fecha","CBI","Item","Subtotal con Tax"])
+    target.to_csv("resultado.csv",index=False,encoding="iso-8859-1")
+    print(path)
+    return None
 
 
 def askDir():
@@ -322,6 +440,7 @@ def askDir():
 #toCSV(r"D:\\VENVXMLCSV\\SerieAprueba\\")
 #reduced_bill(r"D:\\VENVXMLCSV\\SeriePprueba\\")
 #reduced_bill(r"D:\\VENVXMLCSV\\SerieAprueba\\")
+#purchase_order(r"D:\\VENVXMLCSV\\ocPrueba\\")
 
 
 
