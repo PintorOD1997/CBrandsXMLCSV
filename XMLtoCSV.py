@@ -414,9 +414,10 @@ def purchase_order(path):
         s = ' '.join(s)
         s = re.split("\n",s)
         cbi = [x for x in s if "CBI" in x]*len(items)
+        vendor_info = [finder2("Vendor Information:",s,2)]*len(items)
         for i in range(len(items)):        
-            arr.append([fecha[i],cbi[i],items[i],total[i]])
-    target = pd.DataFrame(data = arr,columns = ["Fecha","CBI","Item","Subtotal con Tax"])
+            arr.append([fecha[i],cbi[i],vendor_info[i],items[i],total[i]])
+    target = pd.DataFrame(data = arr,columns = ["Fecha","CBI","Proveedor","Item","Subtotal con Tax"])
     target.to_csv("resultado.csv",index=False,encoding="iso-8859-1")
     print(path)
     return None
