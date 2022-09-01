@@ -236,7 +236,7 @@ def reduced_bill(path):
             putas.append(subtot[-1])
             subtot = putas
             totCargos = putas
-            totPesos = [float(putas[0].replace(',',''))*float(tc)]
+            totPesos = [float(putas[0].replace(',','').replace('$',''))*float(tc)]
 
             
             # Corrección de palabra añejo
