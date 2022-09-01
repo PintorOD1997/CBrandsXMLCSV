@@ -298,7 +298,7 @@ def reduced_bill(path):
             tot = [x for x in s if "." in x]
             tot = tot[-1]
             subtot = tot
-            totPesos = float(tot.replace(',',''))*float(tc)
+            totPesos = float(tot.replace(',','').replace('$',''))*float(tc)
 
             arr.append([fecha, serie, tc, folio, concepto[0], tot, totPesos])
 
