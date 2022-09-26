@@ -6,3 +6,6 @@ SerieAprueba
 ocPrueba
 table test.py
 sample.csv
+CBrandsEnv
+__pycache__
+.vscode

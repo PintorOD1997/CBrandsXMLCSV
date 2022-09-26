@@ -9,7 +9,8 @@ import re
  #Table extraction
  
 from tabula import read_pdf
-
+# Marcando líneas de código que llenen listas
+# Por definición, las funciones finder y finder2 regresan listas
 def toCSV(path):
     os.chdir(path)
     files = os.listdir(path)
@@ -28,9 +29,7 @@ def toCSV(path):
             temp = []
             start = i
             # Búsqueda exhaustiva de la existencia de palabras
-            if start == -1:
-                print("Error Fatal")
-                return None
+                
             start += len(word)+1
             while string[start] != escape:
                 temp.append(string[start])
@@ -39,6 +38,12 @@ def toCSV(path):
             out.append(temp)
             indice +=1
         out = np.array(out).T
+        # Try except sequence
+        try:
+            out[0]
+        except:
+            out = np.array(["Sin datos"])
+                
         return out
     # Se ha creado la lista de archivos validada
     it = 0
@@ -66,30 +71,28 @@ def toCSV(path):
             # Exploración del archivo por string para llenar variables
             s.find("Fecha=")
             
-            fecha = finder("Fecha=",s,"T")
-            serie = finder("Serie=",s)
-            tc = finder("TipoCambio=",s)
+            fecha = finder("Fecha=",s,"T") #lista
+            serie = finder("Serie=",s) #Lista
+            tc = finder("TipoCambio=",s) #Lista
             # occbi y referencia no se encuentran en XML
             occbi = 0
             ref = 0
-            folio = finder("Folio=",s)
+            folio = finder("Folio=",s) #Lista
             tequila = 0
             tipo = 0
-            concepto = finder("Descripcion=",s,".")
-            cases = finder("Cantidad=",s)
+            concepto = finder("Descripcion=",s,".") #lista
+            cases = finder("Cantidad=",s) #Lista
             bot = 0
             lit = 0
-            subtot = finder("SubTotal=",s)
+            subtot = finder("SubTotal=",s) #Lista
             desc = 0
             abo = 0
-            putas = ["0"]*(len(concepto)-1)
-            putas.append(subtot[-1])
-            subtot = putas
-            totCargos = putas
-
+            putas = ["0"]*(len(concepto)-1) #Lista
+            putas.append(subtot[-1]) #Lista
+            subtot = putas #Lista
+            totCargos = putas   #Lista
             
             # Corrección de palabra añejo
-            print(concepto)
             for i in range(len(concepto)):
                 corr = search(" A.*EJO",concepto[i])
                 if corr:
@@ -104,14 +107,14 @@ def toCSV(path):
                        concepto[i] = new
             
             
-            
-            
+
             # Procesado de PDF
             pdfFile = extract_text(file+".pdf")
             # Exploración del archivo por string para llenar variables
             ref =  finder("ORDE",pdfFile,"P")
             occbi = ref
-            print(concepto)
+            print(tc) #Aquí estás
+            
             # Iterando conceptos dentro de una factura
             for i in range(len(concepto)):        
                 arr.append([fecha[0],serie[0],tc[0],occbi[0],ref[0],folio[0],tequila,tipo,concepto[i],
