@@ -85,7 +85,7 @@ def toCSV(path):
             bot = 0
             lit = 0
             subtot = finder("SubTotal=",s) #Lista
-            desc = 0
+            desc = finder("Descuento=",s) #Nuevo feature, extracción de descuentos
             abo = 0
             putas = ["0"]*(len(concepto)-1) #Lista
             putas.append(subtot[-1]) #Lista
@@ -118,7 +118,7 @@ def toCSV(path):
             # Iterando conceptos dentro de una factura
             for i in range(len(concepto)):        
                 arr.append([fecha[0],serie[0],tc[0],occbi[0],ref[0],folio[0],tequila,tipo,concepto[i],
-                                      cases[i],bot,lit,subtot[i],desc,abo,totCargos[i]])
+                                      cases[i],bot,lit,subtot[i],desc[i],abo,totCargos[i]])
         else: #sólo se procesa PDF
 
             print("Procesando sólo PDF")
@@ -436,7 +436,12 @@ def askDir():
     
 # debugger 
 #toCSV(r"D:\\VENVXMLCSV\\SeriePprueba\\")
-#toCSV(r"D:\\VENVXMLCSV\\SerieAprueba\\")
+
+## 12 de octubre 2022, prueba de nuevo feature Descuentos, probado sobre serie A, ubicado dentro del archivo XML
+
+#toCSV(r"D:\\VENVXMLCSV\\SerieAprueba\\") 
+## 12 de octubre, feature testeado exitosamente, todo parece estar en orden, se sube a producción y obser
+## vamos su comportamiento.
 #reduced_bill(r"D:\\VENVXMLCSV\\SeriePprueba\\")
 #reduced_bill(r"D:\\VENVXMLCSV\\SerieAprueba\\")
 #purchase_order(r"D:\\VENVXMLCSV\\ocPrueba\\")
